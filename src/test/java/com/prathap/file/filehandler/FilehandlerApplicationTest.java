@@ -23,7 +23,8 @@ class FilehandlerApplicationTest {
 
 	@LocalServerPort
 	private int port;
-
+	
+	//added only positive test cases here. Negative cases are added in respective controller and service
 	@Test
 	void testHealth() throws Exception {
 		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/health", String.class))
