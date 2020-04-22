@@ -4,6 +4,7 @@ file handler with basic operation to upload and download using api
 to run the application follow the below commands.
 
 git clone 'https://github.com/<user>/filehandler.git'
+
 mvn clean test package spring-boot:run
   
 Use below curl commands to validate the application.
