@@ -1,7 +1,7 @@
 package com.prathap.file.filehandler;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.jayway.jsonpath.JsonPath;
+import com.prathap.file.filehandler.common.FilehandlerHealthInfo;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class FilehandlerApplicationTest {
 
@@ -25,11 +28,13 @@ class FilehandlerApplicationTest {
 	private int port;
 	
 	//added only positive test cases here. Negative cases are added in respective controller and service
+	//Assumption: adding only few test cases. But many other +, -ve test cases need to add.
 	@Test
 	void testHealth() throws Exception {
-		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/health", String.class))
-				.contains("fileHandler is working");
-
+		
+		FilehandlerHealthInfo result = this.restTemplate.getForObject("http://localhost:" + port + "/health", FilehandlerHealthInfo.class);
+		assertEquals(result.getMessage(),"fileHandler is working");
+		
 	}
 
 	@Test
@@ -47,7 +52,12 @@ class FilehandlerApplicationTest {
 		ResponseEntity<String> response = this.restTemplate.postForEntity(uri, map, String.class);
 
 		assertEquals(response.getStatusCodeValue(), HttpStatus.OK.value());
-		assertEquals(response.getBody(), "You successfully uploaded." + fileName);
+		
+//		String responseBody = response.getBody();
+		
+		assertNotNull(JsonPath.parse(response.getBody()).read("$.fileUploadTime"));
+		assertEquals(JsonPath.parse(response.getBody()).read("$.fileUploadMessage").toString(), "You successfully uploaded.");
+		assertEquals(JsonPath.parse(response.getBody()).read("$.fileName").toString(), fileName);
 
 	}
 

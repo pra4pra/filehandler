@@ -1,5 +1,7 @@
 package com.prathap.file.filehandler.controller;
 
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,20 +16,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.prathap.file.filehandler.common.FilehandlerHealthInfo;
 import com.prathap.file.filehandler.common.FilehandlerRuntimeException;
+import com.prathap.file.filehandler.common.FilehandlerUploadFileInfo;
 import com.prathap.file.filehandler.service.FilehandlerService;
 
 @Controller
 public class FilehandlerController {
 
 	private static final Logger logger = LoggerFactory.getLogger(FilehandlerController.class);
-
-	// download file URI. Keep this matching with Get Mapping URI
-//	private final String DOWNLOAD_FILE_URI = "/downloadFile/";
-//	private final String FILE_UPLOAD_SUCCESS_STATUS = "File uploaded completely. Use fileDownloadUri to download.";
-//	private final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
 	private final String HEALTH_SUCCESS_MESSAGE = "fileHandler is working";
 	private final String UPLOAD_SUCCESS_MESSAGE = "You successfully uploaded.";
@@ -39,14 +37,15 @@ public class FilehandlerController {
 		this.filehandlerService = filehandlerService;
 	}
 
-	//Health check service
+	// Health check service
 	@GetMapping("/health")
-	public ResponseEntity<String> health() {
+	public ResponseEntity<FilehandlerHealthInfo> health() {
 		logger.debug("health start");
-		return ResponseEntity.ok(HEALTH_SUCCESS_MESSAGE);
+
+		return ResponseEntity.ok(new FilehandlerHealthInfo(LocalDateTime.now().toString(), HEALTH_SUCCESS_MESSAGE));
 	}
 
-	//File download.
+	// File download.
 	@GetMapping("/downloadFile/{filename:.+}")
 	@ResponseBody
 	public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
@@ -59,13 +58,16 @@ public class FilehandlerController {
 	}
 
 	@PostMapping("/uploadFile")
-	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
-			RedirectAttributes redirectAttributes) {
+	public ResponseEntity<FilehandlerUploadFileInfo> uploadFile(@RequestParam("file") MultipartFile file) {
 
 		logger.info("handleFileUpload start");
 		boolean status = filehandlerService.storeFile(file);
 		logger.debug("file store is completed {}", status);
-		return ResponseEntity.ok(UPLOAD_SUCCESS_MESSAGE + file.getOriginalFilename());
+
+		FilehandlerUploadFileInfo upload = new FilehandlerUploadFileInfo.Builder(LocalDateTime.now().toString(),
+				UPLOAD_SUCCESS_MESSAGE).setFileName(file.getOriginalFilename()).build();
+
+		return ResponseEntity.ok(upload);
 	}
 
 	@ExceptionHandler(FilehandlerRuntimeException.class)
