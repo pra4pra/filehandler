@@ -36,7 +36,7 @@ class FilehandlerServiceImplTest {
 		
 		service.storeFile(new MockMultipartFile("sampleText", "sample.txt", MediaType.TEXT_PLAIN_VALUE,
 				"Sample Text content".getBytes()));
-		assertThat(service.loadFile("foo.txt").exists());
+		assertThat(service.loadFile("sample.txt").exists());
 	}
 
 	@Test
