@@ -6,6 +6,10 @@ to run the application follow the below commands.
 git clone 'https://github.com/pra4pra/filehandler.git'
 
 mvn clean test package spring-boot:run
+
+To check application health using spring actuator:
+
+http://localhost:8080/actuator
   
 Use below curl commands to validate the application.
 curl --location --request GET 'http://localhost:8080/health' \
